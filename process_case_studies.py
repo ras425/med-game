@@ -1,4 +1,8 @@
-#preprocess case studies separately
+#preprocessing case studies 
+#TODO:
+#use this as a dataset: https://github.com/adahealth/medical_case_report_corpus/blob/master/README.md
+
+#placeholder:
 case_studies = [
     {
         "description": "Patient presents with fever, cough, and shortness of breath.",
