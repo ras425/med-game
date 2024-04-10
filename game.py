@@ -91,7 +91,6 @@ if __name__ == "__main__":
         # Play the round using the selected chatbot model
         play_round(chatbot_model)
 
-        # Ask if the user wants to play another round
         play_again = input("Do you want to start a new round? (yes/no): ")
         if play_again.lower() != 'yes':
             break
