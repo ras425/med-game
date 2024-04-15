@@ -1,6 +1,6 @@
 #preprocessing case studies 
 #TODO:
-#use this as a dataset: https://github.com/adahealth/medical_case_report_corpus/blob/master/README.md
+#do this https://github.com/mauro-nievoff/MultiCaRe_Dataset/blob/main/Dataset_Creation_Process/2_Data_Extraction_from_PMC's_Case_Reports.ipynb
 
 #placeholder:
 case_studies = [
