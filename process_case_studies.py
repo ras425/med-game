@@ -1,6 +1,7 @@
 #preprocessing case studies 
 #TODO:
-#do this https://github.com/mauro-nievoff/MultiCaRe_Dataset/blob/main/Dataset_Creation_Process/2_Data_Extraction_from_PMC's_Case_Reports.ipynb
+#a database w api https://github.com/mauro-nievoff/MultiCaRe_Dataset/blob/main/Dataset_Creation_Process/2_Data_Extraction_from_PMC's_Case_Reports.ipynb
+#or https://www.merckmanuals.com/professional/pages-with-widgets/case-studies?mode=list
 
 #placeholder:
 case_studies = [
