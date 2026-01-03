@@ -1,7 +1,7 @@
 # Medical Diagnosis Game
 
 - ask questions to guess the diagnosis
-- game draws from 841 real clinical cases from USMLE medical exam database
+- game draws from 633 real clinical cases from USMLE medical exam database
 
 **Dataset:** [MedQA on Hugging Face](https://huggingface.co/datasets/lavita/medical-qa-datasets)
 

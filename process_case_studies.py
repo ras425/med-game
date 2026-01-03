@@ -146,12 +146,12 @@ def parse_case(row) -> dict | None:
     }
 
 
-def load_cases(num_cases: int = 100) -> list:
-    """Load medical cases from MedQA dataset."""
+def load_cases() -> list:
+    """Load all medical cases from MedQA dataset."""
     global _cached_cases, _parquet_data
     
-    if _cached_cases and len(_cached_cases) >= num_cases:
-        return random.sample(_cached_cases, min(num_cases, len(_cached_cases)))
+    if _cached_cases:
+        return _cached_cases
     
     print("Loading real medical cases from MedQA dataset...")
     
@@ -167,9 +167,6 @@ def load_cases(num_cases: int = 100) -> list:
     seen = set()
     
     for _, row in df.iterrows():
-        if len(cases) >= num_cases * 2:
-            break
-        
         case = parse_case(row)
         if not case:
             continue
@@ -183,4 +180,4 @@ def load_cases(num_cases: int = 100) -> list:
     _cached_cases = cases
     print(f"Loaded {len(cases)} cases.")
     
-    return random.sample(cases, min(num_cases, len(cases)))
+    return cases
