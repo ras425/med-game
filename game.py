@@ -59,7 +59,7 @@ Evaluate if the student's guess is correct. Consider:
 
 Respond in this exact format:
 VERDICT: [CORRECT/CLOSE/INCORRECT]
-FEEDBACK: [One sentence explanation]"""
+HINT: [If incorrect or close, give a brief educational hint to steer them toward the right answer without revealing it. Compare their guess to the correct diagnosis and suggest what they should consider or ask about.]"""
         
         try:
             response = self.client.models.generate_content(
@@ -70,18 +70,18 @@ FEEDBACK: [One sentence explanation]"""
             
             if "VERDICT: CORRECT" in result.upper():
                 return True, "Correct!"
-            elif "VERDICT: CLOSE" in result.upper():
-                # Extract feedback
-                feedback = "You're close! Try to be more specific."
-                if "FEEDBACK:" in result:
-                    feedback = result.split("FEEDBACK:")[-1].strip()
-                return False, f"{Colors.YELLOW}{feedback}{Colors.RESET}"
             else:
-                return False, f"{Colors.RED}Incorrect. Keep investigating!{Colors.RESET}"
+                hint = "Think about what else could explain these symptoms."
+                if "HINT:" in result:
+                    hint = result.split("HINT:")[-1].strip()
+                if "VERDICT: CLOSE" in result.upper():
+                    return False, f"{Colors.YELLOW}Close! {hint}{Colors.RESET}"
+                else:
+                    return False, f"{Colors.YELLOW}Not quite. {hint}{Colors.RESET}"
         except Exception as e:
             if guess.lower().strip() == case['diagnosis'].lower().strip():
                 return True, "Correct!"
-            return False, f"{Colors.RED}Incorrect. Keep investigating!{Colors.RESET}"
+            return False, f"{Colors.YELLOW}Not quite. Consider what other conditions could cause these symptoms.{Colors.RESET}"
     
     def ask_question(self, question: str, case: dict, conversation_history: list) -> str:
         conversation_history.append(f"User: {question}")
@@ -176,7 +176,7 @@ gather information and guess the diagnosis!
 {Colors.BOLD}{Colors.HEADER}📋 NEW PATIENT CASE{Colors.RESET}
 {Colors.CYAN}{'─' * 60}{Colors.RESET}
 
-{Colors.YELLOW}Chief Complaint & History:{Colors.RESET}
+{Colors.YELLOW}Chief Complaint:{Colors.RESET}
 {case['description']}
 {Colors.DIM}Ask questions to learn more about the patient...{Colors.RESET}
 {Colors.CYAN}{'─' * 60}{Colors.RESET}

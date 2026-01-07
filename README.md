@@ -3,7 +3,7 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ooqEnB_L95J1uk-ujM2bwyUA_AuVJfU_?usp=sharing)
 
 - ask questions to guess the diagnosis
-- game draws from 633 real clinical cases from USMLE medical exam database
+- game draws from 525 real clinical cases from USMLE medical exam database
 
 **Dataset:** [MedQA on Hugging Face](https://huggingface.co/datasets/lavita/medical-qa-datasets)
 

@@ -11,18 +11,41 @@ import pyarrow.parquet as pq
 
 DATASET_URL = "https://huggingface.co/datasets/lavita/medical-qa-datasets/resolve/main/medical_meadow_medqa/train-00000-of-00001-1f3ce4c784562e9c.parquet"
 
-# Keywords indicating test results (want to hide these from initial presentation)
-TEST_KEYWORDS = [
+# Keywords to hide from initial presentation (exam findings, vitals, labs, imaging)
+HIDDEN_KEYWORDS = [
+    # Lab tests and values
     r'\bECG\b', r'\bEKG\b', r'\bCT\b', r'\bMRI\b', r'\bX-ray\b', r'\bultrasound\b',
     r'\bbiopsy\b', r'\bhistology\b', r'\blaboratory\b', r'\blab\s', r'\blabs\b',
     r'\bWBC\b', r'\bRBC\b', r'\bhemoglobin\b', r'\bplatelet', r'\bcreatinine\b',
     r'\bALT\b', r'\bAST\b', r'\btroponin\b', r'\bD-dimer\b', r'\bTSH\b',
     r'\burinalysis\b', r'\bculture\b', r'\bPCR\b', r'\becho\b', r'\bangiograph',
     r'\bmg/dL\b', r'\bmmol\b', r'\bU/L\b', r'\bng/mL\b', r'\bSpO2\b',
+    r'\bserum\b', r'\bplasma\b', r'\bblood test', r'\btest result',
+    # Vital signs
     r'\bvital\s+signs?\b', r'\bBP\b', r'\bblood pressure\b', r'\bpulse\b',
-    r'\bHR\b', r'\bRR\b', r'\btemperature\b', r'\bphysical exam',
-    r'\bmurmur\b', r'\bcrackles\b', r'\brales\b', r'\bwheezing\b',
+    r'\bHR\b', r'\bRR\b', r'\btemperature\b', r'\bfebrile\b', r'\bafebrile\b',
+    r'\bheart rate\b', r'\brespiratory rate\b', r'\boxygen saturation\b',
+    r'\b\d+/\d+\s*mm\s*Hg\b',  # blood pressure readings like 120/80 mm Hg
+    r'\b\d+\s*bpm\b',  # heart rate like 80 bpm
+    # Physical examination phrases
+    r'\bphysical exam', r'\bon exam', r'\bupon exam', r'\bexamination\b',
+    r'\bon inspection\b', r'\bon palpation\b', r'\bon auscultation\b',
+    r'\bexam\b.*\bnotable\b', r'\bexam\b.*\bnormal\b', r'\bexams?\b.*\blimits\b',
+    r'\bwithin normal limits\b', r'\bunremarkable\b', r'\bnormal limits\b',
+    r'\bcardiac.*exam\b', r'\bpulmonary.*exam\b', r'\babdominal.*exam\b',
+    r'\bneurological.*exam\b', r'\bskin.*exam\b', r'\bENT\b', r'\bear.*nose.*throat\b',
+    r'\bmurmur\b', r'\bcrackles\b', r'\brales\b', r'\bwheezing\b', r'\brhonchi\b',
+    r'\btenderness\b', r'\bdistension\b', r'\bdistended\b', r'\breduc',
+    r'\bpalpable\b', r'\bpalpation\b', r'\bedema\b', r'\bswelling\b',
+    r'\bbreath sounds\b', r'\bheart sounds\b', r'\bbowel sounds\b',
+    r'\breflexes\b', r'\bpupils\b', r'\bjugular\b', r'\bJVD\b', r'\bJVP\b',
+    r'\bhepatomegaly\b', r'\bsplenomegaly\b', r'\blymphadenopathy\b',
+    r'\bcyanosis\b', r'\bjaundice\b', r'\bicteric\b', r'\bpallor\b',
+    r'\bulcers?\b',  # oral ulcers, skin ulcers found on exam
+    # Result language
     r'reveal(s|ed)?', r'show(s|ed)?', r'demonstrat(e|es|ed)', r'confirm(s|ed)?',
+    r'indicat(e|es|ed)', r'suggest(s|ed)?', r'\bnoted\b', r'\bobserved\b',
+    r'\bfound to\b', r'\bfindings?\b', r'\bis notable\b', r'\bare notable\b',
 ]
 
 # Disease name patterns (answers must contain these)
@@ -105,11 +128,11 @@ def parse_case(row) -> dict | None:
     
     # split into sentences
     sentences = question_text.split('. ')
-    if len(sentences) < 2:
+    if len(sentences) < 5:  # require at least 5 sentences for rich cases
         return None
     
     case_text = '. '.join(sentences[:-1]) + '.'
-    if len(case_text) < 100:
+    if len(case_text) < 300:  # require longer case text
         return None
     
     # Separate presentation from test results
@@ -120,10 +143,13 @@ def parse_case(row) -> dict | None:
         sent = sent.strip()
         if not sent:
             continue
-        is_finding = any(re.search(kw, sent, re.IGNORECASE) for kw in TEST_KEYWORDS)
+        is_finding = any(re.search(kw, sent, re.IGNORECASE) for kw in HIDDEN_KEYWORDS)
         (findings if is_finding else presentation).append(sent)
     
-    if len(presentation) < 1:
+    if len(presentation) < 2:  # need at least 2 presentation sentences
+        return None
+    
+    if len(findings) < 1:  # must have some findings to reveal as hints
         return None
     
     description = '. '.join(presentation)
@@ -134,7 +160,7 @@ def parse_case(row) -> dict | None:
     if details and not details.endswith('.'):
         details += '.'
     
-    if len(description) < 50:
+    if len(description) < 150:  # longer descriptions only
         return None
     
     return {
